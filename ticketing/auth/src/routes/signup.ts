@@ -41,7 +41,8 @@ router.post(
         id: user.id,
         email: user.email,
       },
-      'adsf'
+      // We already checked that this variable is defined during start.
+      process.env.JWT_KEY!
     );
 
     // Store it on session object
