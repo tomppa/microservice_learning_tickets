@@ -4,70 +4,51 @@ import { app } from '../../app';
 
 const signUpUri = '/api/users/signup';
 
-it('should return a 201 on successful signup', async () => {
+const simpleRequest = async (
+  email: string,
+  password: string,
+  statusCode: number
+) => {
   return request(app)
     .post(signUpUri)
     .send({
-      email: 'test@test.com',
-      password: 'password',
+      email: email,
+      password: password,
     })
-    .expect(201);
+    .expect(statusCode);
+};
+
+describe('validation', () => {
+  it('should return a 201 on successful signup', async () => {
+    await simpleRequest('test@test.com', 'password', 201);
+  });
+
+  it('should return a 400, when email is invalid', async () => {
+    await simpleRequest('testtest.com', 'password', 400);
+  });
+
+  it('should return a 400, when password is invalid', async () => {
+    await simpleRequest('test@test.com', 'p', 400);
+  });
+
+  it('should return a 400, when email is empty', async () => {
+    await simpleRequest('', 'password', 400);
+  });
+
+  it('should return a 400, when password is empty', async () => {
+    await simpleRequest('test@test.com', '', 400);
+  });
+
+  it('should not allow duplicate emails', async () => {
+    await simpleRequest('test@test.com', 'password', 201);
+    await simpleRequest('test@test.com', 'password', 400);
+  });
 });
 
-it('should return a 400, when email is invalid', async () => {
-  return request(app)
-    .post(signUpUri)
-    .send({
-      email: 'testtest.com',
-      password: 'password',
-    })
-    .expect(400);
-});
+describe('other stuff', () => {
+  it('should set a cookie after successful sign up', async () => {
+    const response = await simpleRequest('test@test.com', 'password', 201);
 
-it('should return a 400, when password is invalid', async () => {
-  return request(app)
-    .post(signUpUri)
-    .send({
-      email: 'test@test.com',
-      password: 'p',
-    })
-    .expect(400);
-});
-
-it('should return a 400, when email is empty', async () => {
-  return request(app)
-    .post(signUpUri)
-    .send({
-      email: '',
-      password: 'password',
-    })
-    .expect(400);
-});
-
-it('should return a 400, when password is empty', async () => {
-  return request(app)
-    .post(signUpUri)
-    .send({
-      email: 'test@test.com',
-      password: '',
-    })
-    .expect(400);
-});
-
-it('should not allow duplicate emails', async () => {
-  await request(app)
-    .post(signUpUri)
-    .send({
-      email: 'test@test.com',
-      password: 'password',
-    })
-    .expect(201);
-
-  await request(app)
-    .post(signUpUri)
-    .send({
-      email: 'test@test.com',
-      password: 'password',
-    })
-    .expect(400);
+    expect(response.get('Set-Cookie')).toBeDefined();
+  });
 });
