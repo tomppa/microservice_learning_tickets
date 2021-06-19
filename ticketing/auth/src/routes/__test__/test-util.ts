@@ -2,7 +2,7 @@ import request from 'supertest';
 
 import { app } from '../../app';
 
-const simpleRequest = async (
+const postRequest = async (
   uri: string,
   email: string,
   password: string,
@@ -17,12 +17,20 @@ const simpleRequest = async (
     .expect(statusCode);
 };
 
+const getRequest = async (
+  uri: string,
+  cookie: string[],
+  statusCode: number
+) => {
+  return request(app).get(uri).set('Cookie', cookie).send().expect(statusCode);
+};
+
 const signUpRequest = async (
   email: string,
   password: string,
   statusCode: number
 ) => {
-  return simpleRequest('/api/users/signup', email, password, statusCode);
+  return postRequest('/api/users/signup', email, password, statusCode);
 };
 
 const signInRequest = async (
@@ -30,7 +38,7 @@ const signInRequest = async (
   password: string,
   statusCode: number
 ) => {
-  return simpleRequest('/api/users/signin', email, password, statusCode);
+  return postRequest('/api/users/signin', email, password, statusCode);
 };
 
 const signOutRequest = async (
@@ -38,7 +46,11 @@ const signOutRequest = async (
   password: string,
   statusCode: number
 ) => {
-  return simpleRequest('/api/users/signout', email, password, statusCode);
+  return postRequest('/api/users/signout', email, password, statusCode);
 };
 
-export { signUpRequest, signInRequest, signOutRequest };
+const currentUserRequest = async (cookie: string[], statusCode: number) => {
+  return getRequest('/api/users/currentuser', cookie, statusCode);
+};
+
+export { signUpRequest, signInRequest, signOutRequest, currentUserRequest };
