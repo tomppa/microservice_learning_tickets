@@ -8,6 +8,11 @@ const useRequest = ({ url, method, body }) => {
     try {
       setErrors(null);
       const response = await axios[method](url, body);
+
+      if (onSuccess) {
+        onSuccess(response.data);
+      }
+
       return response.data;
     } catch (err) {
       setErrors(
