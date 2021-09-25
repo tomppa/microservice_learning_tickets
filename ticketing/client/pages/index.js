@@ -1,4 +1,6 @@
-import axios from 'axios';
+import buildClient from '../api/build-client';
+
+const CURRENT_USER_PATH = '/api/users/currentuser';
 
 const LandingPage = ({ currentUser }) => {
   // This is executed from the browser.
@@ -7,27 +9,11 @@ const LandingPage = ({ currentUser }) => {
   return <h1>Landing page</h1>;
 };
 
-LandingPage.getInitialProps = async () => {
-  if (typeof window === 'undefined') {
-    // we are on the server!
+LandingPage.getInitialProps = async (context) => {
+  const client = buildClient(context);
+  const { data } = await client.get(CURRENT_USER_PATH);
 
-    const { data } = await axios.get(
-      'http://ingress-nginx-controller.ingress-nginx.svc.cluster.local/api/users/currentuser',
-      {
-        headers: {
-          Host: 'demo-ticketing.com',
-        },
-      }
-    );
-
-    return {};
-  } else {
-    // we are on the browser!
-    const { data } = await axios.get('/api/users/currentuser');
-
-    return data;
-  }
-  return {};
+  return data;
 };
 
 export default LandingPage;
