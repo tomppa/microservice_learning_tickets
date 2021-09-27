@@ -5,44 +5,37 @@ import request from 'supertest';
 import { app } from '../app';
 
 declare global {
-  namespace NodeJS {
-    interface Global {
-      simpleSignUp(): Promise<string[]>;
-      signUp(
-        email: string,
-        password: string,
-        statusCode: number
-      ): Promise<request.Response>;
-      signIn(
-        email: string,
-        password: string,
-        statusCode: number
-      ): Promise<request.Response>;
-      signOut(
-        email: string,
-        password: string,
-        statusCode: number
-      ): Promise<request.Response>;
-      currentUser(
-        cookie: string[],
-        statusCode: number
-      ): Promise<request.Response>;
-    }
-  }
+  function simpleSignUp(): Promise<string[]>;
+  function signUp(
+    email: string,
+    password: string,
+    statusCode: number
+  ): Promise<request.Response>;
+  function signIn(
+    email: string,
+    password: string,
+    statusCode: number
+  ): Promise<request.Response>;
+  function currentUser(
+    cookie: string[],
+    statusCode: number
+  ): Promise<request.Response>;
+  function signOut(
+    email: string,
+    password: string,
+    statusCode: number
+  ): Promise<request.Response>;
 }
 
-let mongo: any;
+let mongo: MongoMemoryServer;
 
 beforeAll(async () => {
   process.env.JWT_KEY = 'my-secret';
 
-  mongo = new MongoMemoryServer();
-  const mongoUri = await mongo.getUri();
+  mongo = await MongoMemoryServer.create();
+  const mongoUri = mongo.getUri();
 
-  await mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(mongoUri);
 });
 
 beforeEach(async () => {
