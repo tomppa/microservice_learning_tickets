@@ -16,6 +16,8 @@ spec:
         - name: tickets
           image: outs4m/tickets
           env:
+            - name: MONGO_URI
+              value: 'mongodb://tickets-mongo-service:27017/tickets'
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
