@@ -4,6 +4,7 @@ import { json } from 'body-parser';
 import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
 
+import { createTicketRouter } from './routes/create';
 import { errorHandler, NotFoundError } from '@thticketsies/common';
 
 const app = express();
@@ -16,6 +17,8 @@ app.use(
     secure: process.env.NODE_ENV !== 'test',
   })
 );
+
+app.use(createTicketRouter);
 
 app.all('*', async (req, res) => {
   throw new NotFoundError();
