@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { app } from '../../app';
+import { Ticket } from '../../models/ticket';
 
 const requestBodies = {
   simpleValid: {
@@ -53,9 +54,10 @@ it('should return an error, if an invalid price is provided', async () => {
 });
 
 it('should create a ticket with valid inputs', async () => {
-  // Add in a check to make sure a ticket was saved.
-
   await createNewTicketRequest(true, requestBodies.simpleValid, 201);
+
+  const tickets = await Ticket.find();
+  expect(tickets).toMatchObject([requestBodies.simpleValid]);
 });
 
 let createNewTicketRequest = async (
