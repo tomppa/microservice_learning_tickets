@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
 
 import { createTicketRouter } from './routes/create';
-import { errorHandler, NotFoundError } from '@thticketsies/common';
+import { errorHandler, NotFoundError, currentUser } from '@thticketsies/common';
 
 const app = express();
 // Trust the ingress nginx, that is used as a proxy in K8s setup.
@@ -18,6 +18,7 @@ app.use(
   })
 );
 
+app.use(currentUser);
 app.use(createTicketRouter);
 
 app.all('*', async (req, res) => {
