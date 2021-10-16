@@ -17,7 +17,7 @@ declare global {
   ): Promise<request.Response>;
 }
 
-const basePath = '/api/tickets';
+const basePath = '/api/tickets/';
 
 let mongo: MongoMemoryServer;
 

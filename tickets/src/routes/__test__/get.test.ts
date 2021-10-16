@@ -11,5 +11,5 @@ it('should return ticket, if the ticket exists', async () => {
   const createResponse = await createNewTicketRequest(true, ticket, 201);
   const getResponse = await getTicketRequest(createResponse.body.id, 200);
 
-  expect(getResponse).toMatchObject(ticket);
+  expect(getResponse.body).toMatchObject(ticket);
 });
