@@ -6,23 +6,18 @@ import jwt from 'jsonwebtoken';
 import { app } from '../app';
 
 declare global {
-  function simpleSignUp(): Promise<string[]>;
-  function signUp(
-    email: string,
-    password: string,
-    statusCode: number
+  function createNewTicketRequest(
+    signedIn: boolean,
+    body: object,
+    expectStatus: number
   ): Promise<request.Response>;
-  function signIn(): string[];
-  function currentUser(
-    cookie: string[],
-    statusCode: number
-  ): Promise<request.Response>;
-  function signOut(
-    email: string,
-    password: string,
-    statusCode: number
+  function getTicketRequest(
+    id: string,
+    expectStatus: number
   ): Promise<request.Response>;
 }
+
+const basePath = '/api/tickets';
 
 let mongo: MongoMemoryServer;
 
@@ -48,40 +43,44 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-const postRequest = async (
-  uri: string,
-  email: string,
-  password: string,
-  statusCode: number
+global.createNewTicketRequest = async (
+  signedIn: boolean,
+  body: object,
+  expectStatus: number
 ) => {
-  return request(app)
-    .post(uri)
-    .send({
-      email: email,
-      password: password,
-    })
-    .expect(statusCode);
+  if (signedIn) {
+    if (!expectStatus) {
+      return await request(app)
+        .post(basePath)
+        .set('Cookie', signIn())
+        .send(body);
+    }
+
+    return await request(app)
+      .post(basePath)
+      .set('Cookie', signIn())
+      .send(body)
+      .expect(expectStatus);
+  }
+
+  if (!expectStatus) {
+    return await request(app).post(basePath).send(body);
+  }
+
+  return await request(app).post(basePath).send(body).expect(expectStatus);
 };
 
-const getRequest = async (
-  uri: string,
-  cookie: string[],
-  statusCode: number
-) => {
-  return request(app).get(uri).set('Cookie', cookie).send().expect(statusCode);
+global.getTicketRequest = async (id: string, expectStatus: number) => {
+  const path = `${basePath}${id}`;
+
+  if (!expectStatus) {
+    return await request(app).get(path).send();
+  }
+
+  return await request(app).get(path).send().expect(expectStatus);
 };
 
-global.signUp = async (email: string, password: string, statusCode: number) => {
-  return postRequest('/api/users/signup', email, password, statusCode);
-};
-
-global.simpleSignUp = async () => {
-  const response = await global.signUp('test@test.com', 'password', 201);
-
-  return response.get('Set-Cookie');
-};
-
-global.signIn = () => {
+const signIn = () => {
   // Build a JWT payload. { id, email }
   const payload = {
     id: 'a0sd9f823l4kj',
@@ -102,16 +101,4 @@ global.signIn = () => {
 
   // Return a string that's the cookie with the encoded data.
   return [`express:sess=${base64}`];
-};
-
-global.signOut = async (
-  email: string,
-  password: string,
-  statusCode: number
-) => {
-  return postRequest('/api/users/signout', email, password, statusCode);
-};
-
-global.currentUser = async (cookie: string[], statusCode: number) => {
-  return getRequest('/api/users/currentuser', cookie, statusCode);
 };

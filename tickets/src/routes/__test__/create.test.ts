@@ -1,5 +1,3 @@
-import request from 'supertest';
-import { app } from '../../app';
 import { Ticket } from '../../models/ticket';
 
 const requestBodies = {
@@ -59,33 +57,3 @@ it('should create a ticket with valid inputs', async () => {
   const tickets = await Ticket.find();
   expect(tickets).toMatchObject([requestBodies.simpleValid]);
 });
-
-let createNewTicketRequest = async (
-  signedIn: boolean,
-  body: object,
-  expectStatus: number
-) => {
-  if (signedIn) {
-    if (!expectStatus) {
-      return await request(app)
-        .post('/api/tickets')
-        .set('Cookie', global.signIn())
-        .send(body);
-    }
-
-    return await request(app)
-      .post('/api/tickets')
-      .set('Cookie', global.signIn())
-      .send(body)
-      .expect(expectStatus);
-  }
-
-  if (!expectStatus) {
-    return await request(app).post('/api/tickets').send(body);
-  }
-
-  return await request(app)
-    .post('/api/tickets')
-    .send(body)
-    .expect(expectStatus);
-};
