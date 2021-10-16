@@ -7,7 +7,7 @@ import { app } from '../app';
 
 declare global {
   /**
-   * Fires off a create request to ticket microservice, and allows parametrization of it.
+   * Fires off a create request to ticket microservice.
    *
    * @param signedIn Whether to sign in before performing the request.
    * @param body Body of the POST request, that will be created.
@@ -21,6 +21,7 @@ declare global {
     expectStatus: number
   ): Promise<request.Response>;
   /**
+   * Fires off a get request for a single ticket to ticket microservice.
    *
    * @param id ID of the ticket that will be retrieved.
    * - If not a truthy value, then a random ID will be generated.
@@ -32,6 +33,14 @@ declare global {
     id: string,
     expectStatus: number
   ): Promise<request.Response>;
+  /**
+   * Fires off a get request for all tickets to ticket microservice.
+   *
+   * @param expectStatus The status code to be expected.
+   * - If not a truthy value, then no validation for return code will be performed.
+   * @returns Response object from the HTTP request.
+   */
+  function getTicketsRequest(expectStatus: number): Promise<request.Response>;
 }
 
 const basePath = '/api/tickets/';
@@ -102,6 +111,14 @@ global.getTicketRequest = async (id: string, expectStatus: number) => {
   }
 
   return await request(app).get(path).send().expect(expectStatus);
+};
+
+global.getTicketsRequest = async (expectStatus: number) => {
+  if (!expectStatus) {
+    return await request(app).get(basePath).send();
+  }
+
+  return await request(app).get(basePath).send().expect(expectStatus);
 };
 
 const signIn = () => {
