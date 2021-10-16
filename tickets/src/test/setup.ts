@@ -85,6 +85,17 @@ global.simpleSignUp = async () => {
 };
 
 global.signIn = async (email: string, password: string, statusCode: number) => {
+  // Build a JWT payload. { id, email }
+
+  // Create the JWT!
+
+  // Build session object. { jwt: MY_JWT }
+
+  // Turn that session into JSON.
+
+  // Take JSON, and encode it as base64.
+
+  // Return a String that's the cookie with the encoded data.
   return postRequest('/api/users/signin', email, password, statusCode);
 };
 
