@@ -1,5 +1,5 @@
 it('should return 404, if the ticket is not found', async () => {
-  await getTicketRequest('asdfasdfasdfasdfadfadsfasdfasdfasdfasdf', 404);
+  await getTicketRequest('', 404);
 });
 
 it('should return ticket, if the ticket exists', async () => {

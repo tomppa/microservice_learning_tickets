@@ -6,11 +6,28 @@ import jwt from 'jsonwebtoken';
 import { app } from '../app';
 
 declare global {
+  /**
+   * Fires off a create request to ticket microservice, and allows parametrization of it.
+   *
+   * @param signedIn Whether to sign in before performing the request.
+   * @param body Body of the POST request, that will be created.
+   * @param expectStatus The status code to be expected.
+   * - If not a truthy value, then no validation for return code will be performed.
+   * @returns Response object from the HTTP request.
+   */
   function createNewTicketRequest(
     signedIn: boolean,
     body: object,
     expectStatus: number
   ): Promise<request.Response>;
+  /**
+   *
+   * @param id ID of the ticket that will be retrieved.
+   * - If not a truthy value, then a random ID will be generated.
+   * @param expectStatus The status code to be expected.
+   * - If not a truthy value, then no validation for return code will be performed.
+   * @returns Response object from the HTTP request.
+   */
   function getTicketRequest(
     id: string,
     expectStatus: number
@@ -71,7 +88,14 @@ global.createNewTicketRequest = async (
 };
 
 global.getTicketRequest = async (id: string, expectStatus: number) => {
-  const path = `${basePath}${id}`;
+  let path;
+
+  if (!id) {
+    const generatedId = new mongoose.Types.ObjectId().toHexString();
+    path = `${basePath}${generatedId}`;
+  } else {
+    path = `${basePath}${id}`;
+  }
 
   if (!expectStatus) {
     return await request(app).get(path).send();
