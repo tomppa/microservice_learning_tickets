@@ -1,3 +1,5 @@
+import { RequestUtil } from '../../test/request-util';
+
 const requestBodies = {
   movieTicket: {
     title: 'Goldfinger',
@@ -19,12 +21,25 @@ it('should retrieve a list of tickets', async () => {
     requestBodies.theaterTicket,
     requestBodies.bookFairTicket,
   ];
+  const generateCookie = true;
 
-  await createNewTicketRequest(true, requestBodies.movieTicket, 201);
-  await createNewTicketRequest(true, requestBodies.theaterTicket, 201);
-  await createNewTicketRequest(true, requestBodies.bookFairTicket, 201);
+  await RequestUtil.createNewTicketRequest({
+    generateCookie,
+    body: requestBodies.movieTicket,
+    expectStatus: 201,
+  });
+  await RequestUtil.createNewTicketRequest({
+    generateCookie,
+    body: requestBodies.theaterTicket,
+    expectStatus: 201,
+  });
+  await RequestUtil.createNewTicketRequest({
+    generateCookie,
+    body: requestBodies.bookFairTicket,
+    expectStatus: 201,
+  });
 
-  const response = await getTicketsRequest(200);
+  const response = await RequestUtil.getTicketsRequest({ expectStatus: 200 });
 
   expect(response.body).toMatchObject(tickets);
 });

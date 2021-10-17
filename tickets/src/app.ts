@@ -7,6 +7,7 @@ import { errorHandler, NotFoundError, currentUser } from '@thticketsies/common';
 import { createTicketRouter } from './routes/create';
 import { getTicketRouter } from './routes/get-single';
 import { getTicketsRouter } from './routes/get-all';
+import { updateTicketRouter } from './routes/update';
 
 const app = express();
 // Trust the ingress nginx, that is used as a proxy in K8s setup.
@@ -24,6 +25,7 @@ app.use(currentUser);
 app.use(createTicketRouter);
 app.use(getTicketRouter);
 app.use(getTicketsRouter);
+app.use(updateTicketRouter);
 
 app.all('*', async (req, res) => {
   throw new NotFoundError();
