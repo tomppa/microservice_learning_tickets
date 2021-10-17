@@ -41,6 +41,21 @@ declare global {
    * @returns Response object from the HTTP request.
    */
   function getTicketsRequest(expectStatus: number): Promise<request.Response>;
+  /**
+   * Fires off an update request to ticket microservice.
+   *
+   * @param signedIn Whether to sign in before performing the request.
+   * @param body Body of the POST request, that will be created.
+   * @param expectStatus The status code to be expected.
+   * - If not a truthy value, then no validation for return code will be performed.
+   * @returns Response object from the HTTP request.
+   */
+  function udpateTicketRequest(
+    signedIn: boolean,
+    id: string,
+    body: object,
+    expectStatus: number
+  ): Promise<request.Response>;
 }
 
 const basePath = '/api/tickets/';
@@ -121,6 +136,39 @@ global.getTicketsRequest = async (expectStatus: number) => {
   return await request(app).get(basePath).send().expect(expectStatus);
 };
 
+global.udpateTicketRequest = async (
+  signedIn: boolean,
+  id: string,
+  body: object,
+  expectStatus: number
+) => {
+  let path;
+
+  if (!id) {
+    const generatedId = new mongoose.Types.ObjectId().toHexString();
+    path = `${basePath}${generatedId}`;
+  } else {
+    path = `${basePath}${id}`;
+  }
+
+  if (signedIn) {
+    if (!expectStatus) {
+      return await request(app).post(path).set('Cookie', signIn()).send(body);
+    }
+
+    return await request(app)
+      .post(path)
+      .set('Cookie', signIn())
+      .send(body)
+      .expect(expectStatus);
+  }
+
+  if (!expectStatus) {
+    return await request(app).post(path).send(body);
+  }
+
+  return await request(app).post(path).send(body).expect(expectStatus);
+};
 const signIn = () => {
   // Build a JWT payload. { id, email }
   const payload = {
